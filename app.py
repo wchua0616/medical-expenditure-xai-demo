@@ -197,7 +197,7 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
         "cancer_dx": reverse_lookup(label_maps["cancer_dx"], cancer_label),
         "adl_help_needed": reverse_lookup(label_maps["adl_help_needed"], adl_label),
         "bmi_missing": int(bmi_missing),
-    }
+        }
 
 X_user = make_input_row(raw_values)
 
