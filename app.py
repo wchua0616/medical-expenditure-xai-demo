@@ -55,7 +55,7 @@ runtime_versions = artifact.get("versions", {})
 global_importance = artifact.get("global_shap_importance")
 model_comparison = artifact.get("model_comparison")
 
-st.subheader("Enter the 14 model predictors")
+st.subheader("Enter the 14 inputs")
 
 left, right = st.columns(2)
 
@@ -117,33 +117,25 @@ with right:
             ["Every day", "Some days"],
         )
 
-    bmi_unavailable = st.checkbox(
-        "9. BMI unavailable",
-        value=False,
-        help=(
-            "If selected, BMI is left missing and the model's BMI-missing indicator "
-            "is set to 1. The fitted preprocessing pipeline imputes the BMI value."
-        ),
+    height_cm = st.number_input(
+        "9. Height (cm)",
+        min_value=120.0,
+        max_value=220.0,
+        value=170.0,
+        step=0.5,
     )
 
-    if bmi_unavailable:
-        bmi = np.nan
-        st.number_input(
-            "10. BMI",
-            min_value=11.5,
-            max_value=50.0,
-            value=27.0,
-            step=0.1,
-            disabled=True,
-        )
-    else:
-        bmi = st.number_input(
-            "10. BMI",
-            min_value=11.5,
-            max_value=50.0,
-            value=27.0,
-            step=0.1,
-        )
+    weight_kg = st.number_input(
+        "10. Weight (kg)",
+        min_value=30.0,
+        max_value=250.0,
+        value=70.0,
+        step=0.5,
+    )
+
+    # BMI is calculated behind the scenes for the trained model.
+    bmi = float(weight_kg) / ((float(height_cm) / 100.0) ** 2)
+    bmi_missing = 0
 
     hbp_label = st.selectbox(
         "11. Diagnosed with high blood pressure",
@@ -164,9 +156,13 @@ with right:
     )
 
     adl_label = st.selectbox(
-        "14. Need help with activities of daily living (ADL)",
+        "14. Need help with Activities of Daily Living",
         list(label_maps["adl_help_needed"].values()),
         index=1,
+        help=(
+            "Activities of Daily Living include basic self-care activities "
+            "such as bathing, dressing, eating, toileting and moving around."
+        ),
     )
 
 
@@ -180,7 +176,7 @@ def reverse_lookup(mapping, label):
 if st.button("Predict healthcare expenditure", type="primary", use_container_width=True):
     raw_values = {
         "age": float(age),
-        "bmi": float(bmi) if not bmi_unavailable else np.nan,
+        "bmi": float(bmi),
         "sex": reverse_lookup(label_maps["sex"], sex_label),
         "race_ethnicity": reverse_lookup(label_maps["race_ethnicity"], race_label),
         "poverty_status": reverse_lookup(label_maps["poverty_status"], poverty_label),
@@ -196,7 +192,7 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
         "diabetes_dx": reverse_lookup(label_maps["diabetes_dx"], diabetes_label),
         "cancer_dx": reverse_lookup(label_maps["cancer_dx"], cancer_label),
         "adl_help_needed": reverse_lookup(label_maps["adl_help_needed"], adl_label),
-        "bmi_missing": int(bmi_unavailable),
+        "bmi_missing": int(bmi_missing),
     }
 
     X_user = make_input_row(raw_values)
@@ -211,6 +207,10 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
     metric_col2.metric("Model", model_name)
     metric_col3.metric("Predictors used", "14")
 
+    st.caption(
+        f"BMI calculated from entered height and weight: {bmi:.2f} kg/m²"
+    )
+
     if prediction < 0:
         st.warning(
             "The unconstrained XGBoost model produced a negative estimate. "
@@ -224,27 +224,22 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
                 "Predictor": [DISPLAY_NAMES[c] for c in FEATURE_COLUMNS],
                 "Entered value": [
                     (
-                        "Missing"
-                        if c == "bmi" and bmi_unavailable
-                        else (
-                            "Yes" if c == "bmi_missing" and bmi_unavailable
-                            else "No" if c == "bmi_missing"
-                            else {
-                                "age": age,
-                                "bmi": None if bmi_unavailable else bmi,
-                                "sex": sex_label,
-                                "race_ethnicity": race_label,
-                                "poverty_status": poverty_label,
-                                "insurance_coverage": insurance_label,
-                                "self_reported_health": health_label,
-                                "currently_smoke": smoker_label,
-                                "smoking_frequency": smoking_frequency_label,
-                                "high_blood_pressure_dx": hbp_label,
-                                "diabetes_dx": diabetes_label,
-                                "cancer_dx": cancer_label,
-                                "adl_help_needed": adl_label,
-                            }.get(c)
-                        )
+{
+                            "age": age,
+                            "bmi": round(bmi, 2),
+                            "sex": sex_label,
+                            "race_ethnicity": race_label,
+                            "poverty_status": poverty_label,
+                            "insurance_coverage": insurance_label,
+                            "self_reported_health": health_label,
+                            "currently_smoke": smoker_label,
+                            "smoking_frequency": smoking_frequency_label,
+                            "high_blood_pressure_dx": hbp_label,
+                            "diabetes_dx": diabetes_label,
+                            "cancer_dx": cancer_label,
+                            "adl_help_needed": adl_label,
+                            "bmi_missing": "No",
+                        }.get(c)
                     )
                     for c in FEATURE_COLUMNS
                 ],
