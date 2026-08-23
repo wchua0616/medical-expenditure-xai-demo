@@ -201,35 +201,44 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
 
     X_user = make_input_row(raw_values)
 
-    prediction_usd = float(
+prediction_usd = float(
     pipeline.predict(X_user)[0]
-    )
+)
 
-    prediction_myr = (
-        prediction_usd
-        * USD_TO_MYR
-    )
+prediction_myr = (
+    prediction_usd
+    * USD_TO_MYR
+)
 
-    metric_col1, metric_col2, metric_col3 = st.columns(3)
-    metric_col1.metric(
-        "Estimated annual healthcare expenditure",
-        f"RM {prediction_myr:,.0f}",
-    )
-    metric_col2.metric("Model", model_name)
-    metric_col3.metric("Predictors used", "14")
+metric_col1, metric_col2, metric_col3 = st.columns(3)
 
-    st.caption(
-        f"BMI calculated from entered height and weight: "
-        f"{bmi:.2f} kg/m²  •  "
-        f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
-    )
+metric_col1.metric(
+    "Estimated annual healthcare expenditure",
+    f"RM {prediction_myr:,.0f}",
+)
 
-    if prediction < 0:
-        st.warning(
-            "The unconstrained XGBoost model produced a negative estimate. "
-            "A practical zero-floor sensitivity would report $0, but the SHAP "
-            "breakdown below explains the original model output."
-        )
+metric_col2.metric(
+    "Model",
+    model_name
+)
+
+metric_col3.metric(
+    "Predictors used",
+    "14"
+)
+
+st.caption(
+    f"BMI calculated from entered height and weight: "
+    f"{bmi:.2f} kg/m²  •  "
+    f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
+)
+
+if prediction_usd < 0:
+    st.warning(
+        "The unconstrained XGBoost model produced a negative estimate. "
+        "A practical zero-floor sensitivity would report RM 0, but the SHAP "
+        "breakdown below explains the original model output."
+    )
 
     with st.expander("Input profile"):
         profile = pd.DataFrame(
