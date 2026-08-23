@@ -237,7 +237,7 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
                 "Predictor": [DISPLAY_NAMES[c] for c in FEATURE_COLUMNS],
                 "Entered value": [
                     (
-{
+                        {
                             "age": age,
                             "bmi": round(bmi, 2),
                             "sex": sex_label,
