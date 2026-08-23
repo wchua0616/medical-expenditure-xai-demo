@@ -210,28 +210,28 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
         * USD_TO_MYR
     )
 
-metric_col1, metric_col2, metric_col3 = st.columns(3)
+    metric_col1, metric_col2, metric_col3 = st.columns(3)
 
-metric_col1.metric(
-    "Estimated annual healthcare expenditure",
-    f"RM {prediction_myr:,.0f}",
-)
+    metric_col1.metric(
+        "Estimated annual healthcare expenditure",
+        f"RM {prediction_myr:,.0f}",
+    )
 
-metric_col2.metric(
-    "Model",
-    model_name
-)
+    metric_col2.metric(
+        "Model",
+        model_name
+    )
 
-metric_col3.metric(
-    "Predictors used",
-    "14"
-)
+    metric_col3.metric(
+        "Predictors used",
+        "14"
+    )
 
-st.caption(
-    f"BMI calculated from entered height and weight: "
-    f"{bmi:.2f} kg/m²  •  "
-    f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
-)
+    st.caption(
+        f"BMI calculated from entered height and weight: "
+        f"{bmi:.2f} kg/m²  •  "
+        f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
+    )
 
 if prediction_usd < 0:
     st.warning(
