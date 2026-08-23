@@ -233,12 +233,12 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
         f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
     )
 
-if prediction_usd < 0:
-    st.warning(
-        "The unconstrained XGBoost model produced a negative estimate. "
-        "A practical zero-floor sensitivity would report RM 0, but the SHAP "
-        "breakdown below explains the original model output."
-    )
+    if prediction_usd < 0:
+        st.warning(
+            "The unconstrained XGBoost model produced a negative estimate. "
+            "A practical zero-floor sensitivity would report RM 0, but the SHAP "
+            "breakdown below explains the original model output."
+        )
 
     with st.expander("Input profile"):
         profile = pd.DataFrame(
