@@ -208,14 +208,14 @@ def contribution_table(contributions, predictor_labels):
         rows.append(
             {
                 "Predictor": predictor_labels[feature],
-                "SHAP contribution (USD)": float(value),
+                "SHAP contribution (MYR)": float(value),
                 "Direction": "Increases prediction" if value >= 0 else "Decreases prediction",
             }
         )
 
     return (
         pd.DataFrame(rows)
-        .assign(_abs=lambda x: x["SHAP contribution (USD)"].abs())
+        .assign(_abs=lambda x: x["SHAP contribution (MYR)"].abs())
         .sort_values("_abs", ascending=False)
         .drop(columns="_abs")
         .reset_index(drop=True)
@@ -328,7 +328,7 @@ def make_local_waterfall(
         clip_on=False,
     )
 
-    ax.set_xlabel("Healthcare Expenditure Prediction (USD/year)")
+    ax.set_xlabel("Healthcare Expenditure Prediction (MYR/year)")
     ax.set_title("Local SHAP Explanation – XGBoost")
     ax.grid(axis="y", linestyle=":", alpha=0.25)
     ax.spines[["top", "right", "left"]].set_visible(False)
