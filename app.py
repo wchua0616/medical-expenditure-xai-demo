@@ -199,16 +199,16 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
         "bmi_missing": int(bmi_missing),
         }
 
-X_user = make_input_row(raw_values)
+    X_user = make_input_row(raw_values)
 
-prediction_usd = float(
-    pipeline.predict(X_user)[0]
-)
+    prediction_usd = float(
+        pipeline.predict(X_user)[0]
+    )
 
-prediction_myr = (
-    prediction_usd
-    * USD_TO_MYR
-)
+    prediction_myr = (
+        prediction_usd
+        * USD_TO_MYR
+    )
 
 metric_col1, metric_col2, metric_col3 = st.columns(3)
 
