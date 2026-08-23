@@ -15,6 +15,10 @@ from demo_utils import (
     contribution_table,
 )
 
+# Fixed FX rate used for demo presentation
+# Update this rate whenever needed
+USD_TO_MYR = 4.20
+
 st.set_page_config(
     page_title="Explainable Healthcare Expenditure Predictor",
     page_icon="📊",
@@ -197,18 +201,27 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
 
     X_user = make_input_row(raw_values)
 
-    prediction = float(pipeline.predict(X_user)[0])
+    prediction_usd = float(
+    pipeline.predict(X_user)[0]
+    )
+
+    prediction_myr = (
+        prediction_usd
+        * USD_TO_MYR
+    )
 
     metric_col1, metric_col2, metric_col3 = st.columns(3)
     metric_col1.metric(
         "Estimated annual healthcare expenditure",
-        f"${prediction:,.0f}",
+        f"RM {prediction_myr:,.0f}",
     )
     metric_col2.metric("Model", model_name)
     metric_col3.metric("Predictors used", "14")
 
     st.caption(
-        f"BMI calculated from entered height and weight: {bmi:.2f} kg/m²"
+        f"BMI calculated from entered height and weight: "
+        f"{bmi:.2f} kg/m²  •  "
+        f"Currency conversion: 1 USD = RM {USD_TO_MYR:.2f}"
     )
 
     if prediction < 0:
@@ -254,7 +267,24 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
             raw_values=raw_values,
             label_maps=label_maps,
         )
+    explanation_myr = {
+        **explanation,
 
+        "prediction":
+            explanation["prediction"]
+            * USD_TO_MYR,
+
+        "base_value":
+            explanation["base_value"]
+            * USD_TO_MYR,
+
+        "contributions": {
+            key: value * USD_TO_MYR
+            for key, value
+            in explanation["contributions"].items()
+        }
+    }
+    
     st.subheader("Why did the model produce this estimate?")
     st.caption(
         "Positive SHAP contributions increase this individual's prediction relative "
@@ -263,10 +293,18 @@ if st.button("Predict healthcare expenditure", type="primary", use_container_wid
     )
 
     fig = make_local_waterfall(
-        base_value=explanation["base_value"],
-        prediction=explanation["prediction"],
-        contributions=explanation["contributions"],
-        predictor_labels=explanation["predictor_labels"],
+        base_value=explanation_myr[
+            "base_value"
+        ],
+        prediction=explanation_myr[
+            "prediction"
+        ],
+        contributions=explanation_myr[
+            "contributions"
+        ],
+        predictor_labels=explanation_myr[
+            "predictor_labels"
+        ],
     )
     st.pyplot(fig, use_container_width=True)
 
