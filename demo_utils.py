@@ -32,7 +32,7 @@ DISPLAY_NAMES = {
     "high_blood_pressure_dx": "High Blood Pressure",
     "diabetes_dx": "Diabetes",
     "cancer_dx": "Cancer",
-    "adl_help_needed": "ADL Help Needed",
+    "adl_help_needed": "Activities of Daily Living Help Needed",
     "bmi_missing": "BMI Missing Indicator",
 }
 
